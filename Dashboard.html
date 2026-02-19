@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body { font-family: Arial, sans-serif; margin: 12px; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+      .card { border: 1px solid #ddd; border-radius: 8px; padding: 10px; min-width: 140px; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border: 1px solid #ddd; padding: 8px; }
+      button { padding: 8px 12px; }
+      .warn { color: #d97706; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <h2>ESAMS Dashboard</h2>
+    <div id="meta"></div>
+
+    <div class="row" id="cards"></div>
+
+    <div class="row">
+      <select id="batch"></select>
+      <input id="date" type="date" />
+      <button onclick="loadStudents()">Load Students</button>
+      <button onclick="saveAttendance()">Save Attendance</button>
+    </div>
+
+    <table id="studentsTable"></table>
+
+    <script>
+      let currentStudents = [];
+
+      google.script.run.withSuccessHandler(init).getDashboardData();
+
+      function init(data) {
+        document.getElementById('meta').innerText = `${data.user.name} (${data.user.role}) - ${data.user.email}`;
+        document.getElementById('cards').innerHTML = `
+          <div class="card">Total Students: ${data.totalStudents}</div>
+          <div class="card">Today Marked: ${data.todayAttendanceCount}</div>
+          <div class="card">Present: ${data.presentCount}</div>
+          <div class="card">Absent: ${data.absentCount}</div>
+          <div class="card warn">Below 75%: ${data.belowThreshold.length}</div>
+        `;
+
+        const batchSel = document.getElementById('batch');
+        batchSel.innerHTML = data.batches.map(b => `<option value="${b.batchId}">${b.batchName || b.batchId}</option>`).join('');
+        document.getElementById('date').valueAsDate = new Date();
+      }
+
+      function loadStudents() {
+        const batchId = document.getElementById('batch').value;
+        google.script.run.withSuccessHandler(renderStudents).getStudentsByBatch(batchId);
+      }
+
+      function renderStudents(students) {
+        currentStudents = students;
+        const rows = students.map((s, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${s.fullName}</td>
+            <td>
+              <label><input type="radio" name="st_${s.studentId}" value="P" checked /> P</label>
+              <label><input type="radio" name="st_${s.studentId}" value="A" /> A</label>
+            </td>
+          </tr>
+        `).join('');
+
+        document.getElementById('studentsTable').innerHTML = `
+          <tr><th>#</th><th>Name</th><th>Status</th></tr>
+          ${rows}
+        `;
+      }
+
+      function saveAttendance() {
+        const batchId = document.getElementById('batch').value;
+        const date = document.getElementById('date').value;
+        const records = currentStudents.map(s => {
+          const status = document.querySelector(`input[name="st_${s.studentId}"]:checked`).value;
+          return { studentId: s.studentId, status };
+        });
+
+        google.script.run.withSuccessHandler(() => {
+          alert('Attendance saved');
+          google.script.run.withSuccessHandler(init).getDashboardData();
+        }).markAttendance({ batchId, date, records });
+      }
+    </script>
+  </body>
+</html>
