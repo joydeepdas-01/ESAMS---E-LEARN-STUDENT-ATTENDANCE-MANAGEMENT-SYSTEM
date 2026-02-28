@@ -1,0 +1,3 @@
+teacher_batch_id,teacher_user_id,batch_id,assigned_at,active_status
+TBM001,USR002,BAT001,2026-01-11T10:00:00Z,1
+TBM002,USR003,BAT002,2026-01-11T10:00:00Z,1

@@ -1,0 +1,4 @@
+student_id,full_name,phone,guardian_phone,email,admission_date,joining_date,active_status,photo_url,created_at
+STU001,Ananya Sharma,9876543210,9123456780,ananya@example.com,2026-01-10,2026-01-12,1,https://example.com/photos/stu001.jpg,2026-01-10T09:00:00Z
+STU002,Rahul Mehta,9876500001,9123400001,rahul@example.com,2026-01-10,2026-01-12,1,https://example.com/photos/stu002.jpg,2026-01-10T09:01:00Z
+STU003,Priya Nair,9876500002,9123400002,priya@example.com,2026-01-10,2026-01-12,1,https://example.com/photos/stu003.jpg,2026-01-10T09:02:00Z
